@@ -1,9 +1,11 @@
 package com.crawl.web.service.impl;
 
 import java.util.List;
+
 import org.apache.log4j.Logger;
 
 import com.crawl.web.service.CrawlerService;
+import com.crawl.web.util.URLFormatter;
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -38,6 +40,11 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					+ " 'bucket' divs.");
 			for (Object s : mailArchivesList) {
 				log.debug(s.toString());
+			}
+			URLFormatter formatURL= new URLFormatter();
+			List<String> urlList= formatURL.getURLList(url, mailArchivesList);
+			for (String nurl : urlList) {
+				log.debug(nurl);
 			}
 		} catch (Exception e) {
 			System.out.println("Exception Caught" + e.getStackTrace());
