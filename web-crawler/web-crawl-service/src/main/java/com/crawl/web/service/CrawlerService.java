@@ -12,7 +12,9 @@ import com.crawl.web.util.exception.WebCrawlerServiceException;
  *  ============	============	============	===================
  *  03/02/2015		03/02/2015		chandu-atina 	initial skeleton creation
  */
-
+/**
+ * hi sample java document 
+ */
 public interface CrawlerService {
 
 	public void processRequest(String URL) throws WebCrawlerServiceException;
