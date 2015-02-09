@@ -17,6 +17,8 @@
 		<property name="webURL" value="${WEB_URL}" />
 		<property name="mailLocation" value="${MAIL_LOCATION}" />
 		<property name="savePointLocation" value="${SAVE_POINT_LOCATION}" />
+		<property name="year" value="${YEAR}" />
+		<property name="fileNameExtension" value="${FILE_NAME_EXTENSION}" />
 	</bean>
 
 </beans>

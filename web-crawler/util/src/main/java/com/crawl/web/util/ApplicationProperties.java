@@ -27,6 +27,16 @@ public class ApplicationProperties {
 	 * Location where the application store the save point 
 	 */
 	private String savePointLocation ;
+	
+	/**
+	 * year indicates the year to crawl 
+	 */
+	private String year;
+	
+	/**
+	 * indicates the save point file extension 
+	 */
+	private String fileNameExtension;
 
 	/**
 	 * @return the webURL
@@ -70,4 +80,32 @@ public class ApplicationProperties {
 		this.savePointLocation = savePointLocation;
 	}
 
+	/**
+	 * @return the year
+	 */
+	public String getYear() {
+		return year;
+	}
+
+	/**
+	 * @param year the year to set
+	 */
+	public void setYear(String year) {
+		this.year = year;
+	}
+
+	/**
+	 * @return the fileNameExtension
+	 */
+	public String getFileNameExtension() {
+		return fileNameExtension;
+	}
+
+	/**
+	 * @param fileNameExtension the fileNameExtension to set
+	 */
+	public void setFileNameExtension(String fileNameExtension) {
+		this.fileNameExtension = fileNameExtension;
+	}
+	
 }
