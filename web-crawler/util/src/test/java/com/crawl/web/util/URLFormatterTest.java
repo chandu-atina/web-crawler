@@ -3,41 +3,55 @@
  */
 package com.crawl.web.util;
 
-import static org.junit.Assert.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Test;
-
 import junit.framework.TestCase;
 
 /**
- * @author chandrasekhara
+ * Test Class to test URLFormatter
  *
  */
-public class URLFormatterTest extends TestCase {
+public class URLFormatterTest extends TestCase{
+	
+
+	URLFormatter urlFormat=new URLFormatter();
 
 	/**
-	 * @param name
+	 * Test method to verify the URL formatting
+	 *
 	 */
-	public URLFormatterTest(String name) {
-		super(name);
-	}
-
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-
-	/* (non-Javadoc)
-	 * @see junit.framework.TestCase#tearDown()
-	 */
-	protected void tearDown() throws Exception {
-		super.tearDown();
-	}
-	
 	@Test
-	public void getURLList() throws Exception {
-		//fail();
+	public void testGetURLList() throws Exception {
+		// fail();
+		List<String> expectedList=new ArrayList<String>();
+		expectedList.add("http://www.google.com/201312.mbox/browser");
+		expectedList.add("http://www.google.com/201311.mbox/browser");
+		expectedList.add("http://www.google.com/201310.mbox/browser");
+		
+		List<String> urlList=new ArrayList<String>();
+		urlList.add("[HtmlAnchor[<a href=\"201312.mbox/browser\" title=\"Dynamic browser\">]");
+		urlList.add("[HtmlAnchor[<a href=\"201311.mbox/browser\" title=\"Dynamic browser\">]");
+		urlList.add("[HtmlAnchor[<a href=\"201310.mbox/browser\" title=\"Dynamic browser\">]");
+		
+		String regex="2013.*mbox/browser";
+		List<String> actualList=urlFormat.getURLList("http://www.google.com/", urlList, regex);
+		
+		assertEquals("Mismatch ",expectedList, actualList);
+	}
+
+	/**
+	 * @return the urlFormat
+	 */
+	public URLFormatter getUrlFormat() {
+		return urlFormat;
+	}
+
+	/**
+	 * @param urlFormat the urlFormat to set
+	 */
+	public void setUrlFormat(URLFormatter urlFormat) {
+		this.urlFormat = urlFormat;
 	}
 }
