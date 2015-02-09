@@ -10,6 +10,7 @@ package com.crawl.web.util.messages;
  */
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class ErrorMessages {
@@ -65,7 +66,12 @@ public class ErrorMessages {
 		 */
 		@Override
 		public String toString() {
-			return errors.toString();
+			Iterator<ErrorMessage> it= errors.iterator();
+			StringBuffer sb= new StringBuffer();
+			while(it.hasNext()){
+				sb.append(it.next().toString());
+			}
+			return sb.toString();
 
 		}
 }

@@ -57,7 +57,7 @@ public class ErrorMessage {
 
 	
 	public String toString(){
-		return "Error Code :"+code+" || Errror Message :"+message+" || Root Cause :"+rootCause.toString();
+		return "Error Code :"+code+" || Errror Message :"+message+" || Root Cause :"+rootCause;
 	}
 
 	public Throwable getRootCause() {
