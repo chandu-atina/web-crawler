@@ -61,19 +61,17 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	 * logger class
 	 */
 	final static Logger log = Logger.getLogger(WebCrawlerServiceImpl.class);
-
+	
 	/**
-	 * CLASS_NAME used for logging purpose
+	 * HashTable used to load the save point parameters
 	 */
-	final static String CLASS_NAME = "WebCrawlerServiceImpl ";
-
 	Hashtable<String, String> savePoint;
 
 	/**
 	 * Process the URL and save all mails linked to the URL.
 	 */
 	public void processRequest(String url1) throws WebCrawlerServiceException {
-		final String METHOD_NAME = "processRequest";
+		final String METHOD_NAME = "processRequest - ";
 		try {
 
 			/* comment out to turn off annoying htmlunit warnings */
@@ -81,7 +79,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					.setLevel(java.util.logging.Level.OFF);
 			String url = appProp.getWebURL();
 			WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
-			log.info(CLASS_NAME + METHOD_NAME + " Loading page now: " + url);
+			log.info("Method:" + METHOD_NAME + " Loading page now: " + url);
 			HtmlPage page = webClient.getPage(url);
 
 			/* will wait JavaScript to execute up to 30s */
@@ -119,11 +117,12 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 						WebCrawlerConstants.SAVE_POINT_YES)) {
 					if (directoryName.compareTo(savePoint
 							.get(WebCrawlerConstants.KEY_DIRECTORY)) > 0) {
-						log.debug("Skipping current directory :"+directoryName);
+						log.debug("Method:" + METHOD_NAME
+								+ "Skipping current directory :"+directoryName);
 						continue;
 					}
 				}
-				log.info(CLASS_NAME + METHOD_NAME + " Loading page now: "
+				log.info("Method:" + METHOD_NAME + " Loading page now: "
 						+ mprimaryURL);
 
 				page = webClient.getPage(mprimaryURL);
@@ -147,15 +146,18 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					index = secondaryURLList.indexOf(savePoint
 							.get(WebCrawlerConstants.KEY_URL));
 					if (index < 0) {
-						log.info(CLASS_NAME + METHOD_NAME
+						log.info("Method:" + METHOD_NAME
 								+ "Current List of URLs are already processed");
 					} else if (index >= 0) {
-						log.info("Processing remaining URLs in the current directory :"+directoryName);
+						log.info("Method:" + METHOD_NAME
+								+ "Processing remaining URLs in the current directory :"+directoryName);
 						saveMails(secondaryURLList.subList(index,
 								secondaryURLList.size()), directoryName);
 						savePointResumed = true;
 					}
 				} else {
+					log.info("Method:" + METHOD_NAME
+							+ "Processing URLs in the current directory :"+directoryName);
 					saveMails(secondaryURLList, directoryName);
 				}
 
@@ -186,17 +188,20 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 									.get(WebCrawlerConstants.KEY_URL));
 
 							if (index < 0) {
-								log.info(CLASS_NAME
+								log.info("Method:"
 										+ METHOD_NAME
 										+ "Current List of URLs are already processed");
 							} else if (index >= 0) {
-								log.info("Processing remaining URLs in the current directory :"+directoryName);
+								log.info("Method:" + METHOD_NAME
+										+ "Processing remaining URLs in the current directory :"+directoryName);
 								saveMails(subSecondaryURLList.subList(index,
 										subSecondaryURLList.size()),
 										directoryName);
+								savePointResumed = true;
 							}
 						} else {
-							// TODO fetch content
+							log.info("Method:" + METHOD_NAME
+									+ "Processing URLs in the current directory :"+directoryName);
 							saveMails(subSecondaryURLList, directoryName);
 						}
 						page = subPage;
@@ -204,7 +209,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					} catch (ElementNotFoundException e) {
 
 						/* Indicates end of pagination */
-						log.info(CLASS_NAME + METHOD_NAME
+						log.info("Method:" + METHOD_NAME
 								+ " End of Pagination");
 						break;
 					}
@@ -230,17 +235,17 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public List<String> fetchURLs(HtmlPage page, String xPath, String baseURL,
 			String regex) {
 		List<String> urlList;
-		final String METHOD_NAME = "fetchURLs ";
+		final String METHOD_NAME = "fetchURLs - ";
 
 		// select the nodes based on xpath
 		List<?> mailArchivesList = page.getByXPath(xPath);
-		log.info(CLASS_NAME + METHOD_NAME
+		log.info("Method:" + METHOD_NAME
 				+ " No.of nodes found based on XPath " + xPath + " :"
 				+ mailArchivesList.size());
 
 		urlList = formatURL.getURLList(baseURL, mailArchivesList, regex);
 		for (String nurl : urlList) {
-			log.debug(CLASS_NAME + METHOD_NAME + nurl);
+			log.debug("Method:" + METHOD_NAME + nurl);
 		}
 		return urlList;
 	}
@@ -252,7 +257,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public boolean saveMails(List<String> mailURLList, String directoryName)
 			throws IOException {
 		boolean processedFlag = false;
-		final String METHOD_NAME = "saveMails ";
+		final String METHOD_NAME = "saveMails - ";
 		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
 
 		for (String url : mailURLList) {
@@ -276,7 +281,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(page.asXml());
 			bw.close();
-			log.debug(CLASS_NAME + METHOD_NAME + "Saved content from URL :"
+			log.debug("Method:" + METHOD_NAME + "Saved content from URL :"
 					+ url);
 			ApplicationCache.getInstance().setAppCacheValue(
 					WebCrawlerConstants.KEY_DIRECTORY
@@ -285,10 +290,11 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			ApplicationCache.getInstance().setAppCacheValue(
 					WebCrawlerConstants.KEY_URL
 							+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
-			log.debug("Save point stored in Application cache !!");
+			log.debug("Method:" + METHOD_NAME
+					+ "Save point stored in Application cache !!");
 		}
-		log.info(CLASS_NAME + METHOD_NAME
-				+ "Saved all mails in the curret Page");
+		log.info("Method:" + METHOD_NAME
+				+ "Saved all mails in the curret Page. No.of mails saved :"+mailURLList.size());
 		processedFlag = true;
 		return processedFlag;
 	}
@@ -362,8 +368,10 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public void savePoint() {
 		Hashtable<String, String> cache = ApplicationCache.getInstance()
 				.getAppCache();
+		final String METHOD_NAME = "savePoint - ";
 		if((cache.size()==0)){
-			log.debug("No data available for Save Point in Application Cache !!!");
+			log.debug("Method:" + METHOD_NAME
+					+ "No data available for Save Point in Application Cache !!!");
 			return;
 		}
 		String path = appProp.getSavePointLocation() + appProp.getYear()
@@ -382,7 +390,8 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 						+ WebCrawlerConstants.FIELD_SEPERATOR);
 			}
 			bw.close();
-			log.info("Save Point saved successfully to File System!!!");
+			log.info("Method:" + METHOD_NAME
+					+ "Save Point saved successfully to File System!!!");
 		} catch (IOException e) {
 			throw new WebCrawlerServiceException(new ErrorMessage(
 					e.getMessage(), e.getCause()));
@@ -413,12 +422,14 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	 */
 	public Hashtable<String, String> retrieveSavePoint() throws IOException {
 		Hashtable<String, String> savePoint = new Hashtable<String, String>();
+		final String METHOD_NAME="retrieveSavePoint - ";
 		File file = new File(appProp.getSavePointLocation() + appProp.getYear()
 				+ appProp.getFileNameExtension());
 		if (!file.exists()) {
 			savePoint.put(WebCrawlerConstants.SAVE_POINT,
 					WebCrawlerConstants.SAVE_POINT_NO);
-			log.debug("No save point available to resume");
+			log.debug("Method:" + METHOD_NAME
+					+ "No save point available to resume");
 			return savePoint;
 		}
 
@@ -430,7 +441,8 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			savePoint.put(WebCrawlerConstants.SAVE_POINT,
 					WebCrawlerConstants.SAVE_POINT_NO);
 			br.close();
-			log.debug("No data available in save point file !!!");
+			log.debug("Method:" + METHOD_NAME
+					+ "No data available in save point file !!!");
 			return savePoint;
 		}
 		StringTokenizer st = new StringTokenizer(s,
@@ -447,7 +459,8 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 		savePoint.put(WebCrawlerConstants.SAVE_POINT,
 				WebCrawlerConstants.SAVE_POINT_YES);
-		log.info("Save point retrieved successfully");
+		log.info("Method:" + METHOD_NAME
+				+ "Save point retrieved successfully");
 		return savePoint;
 	}
 }
