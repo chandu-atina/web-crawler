@@ -6,8 +6,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.crawl.web.exception.WebCrawlerServiceException;
 import com.crawl.web.service.CrawlerService;
-import com.crawl.web.util.exception.WebCrawlerServiceException;
 /**
  * Crawler is a entry point for crawling a web URL.
  * This is a main class which is automatically picked from
