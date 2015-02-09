@@ -84,7 +84,8 @@ public class WebCrawlerServiceException extends ServiceException
 	 */
 	@Override
 	public String toString() {
-		return super.toString()+"\n"+this.getErrors().toString();
+		//return super.toString()+"\n"+this.getErrors().toString();
+		return super.toString();
 	}
 	
 }
