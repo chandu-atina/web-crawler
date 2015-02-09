@@ -40,6 +40,7 @@ public class Crawler {
 			// crawler.processRequest("http://mail-archives.apache.org/mod_mbox/maven-users/");
 		} catch (WebCrawlerServiceException e) {
 			log.error(e.toString());
+			log.info("Crawler Terminated !!!");
 		}
 	}
 	
