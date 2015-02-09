@@ -108,4 +108,13 @@ public class ApplicationProperties {
 		this.fileNameExtension = fileNameExtension;
 	}
 	
+	/**
+	 * @return all properties appended as a string
+	 */
+	public String toString() {
+		return "WEB_URL :" + this.webURL + " FILE_NAME_EXTENSION :"
+				+ this.fileNameExtension + " MAIL_LOCATION :"
+				+ this.mailLocation + " SAVE_POINT_LOCATION :"
+				+ this.savePointLocation + "YEAR :" + this.year;
+	}
 }
