@@ -87,9 +87,10 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			/* will wait JavaScript to execute up to 30s */
 			webClient.waitForBackgroundJavaScript(30 * 1000);
 
-			/* selects current node whose id like '2014' and has an anchor tag' */
-			String primaryXPath = ".//*[@id[contains(string(),'2014')]]/a";
-			String primaryRegex = "2014.*mbox/browser";
+			/* selects current node whose id like 'year' and has an anchor tag' */
+			String primaryXPath = ".//*[@id[contains(string(),'"+appProp.getYear()+"')]]/a";
+			
+			String primaryRegex = appProp.getYear()+".*mbox/browser";
 
 			/*
 			 * Fetch the save point from file
@@ -110,14 +111,15 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 				 * directory name
 				 */
 				String directoryName = mprimaryURL.substring(
-						mprimaryURL.indexOf("2014"),
-						mprimaryURL.indexOf("2014") + 6);
+						mprimaryURL.indexOf(appProp.getYear()),
+						mprimaryURL.indexOf(appProp.getYear()) + 6);
 
 				/* Check for save point */
 				if (savePoint.get(WebCrawlerConstants.SAVE_POINT).equals(
 						WebCrawlerConstants.SAVE_POINT_YES)) {
 					if (directoryName.compareTo(savePoint
 							.get(WebCrawlerConstants.KEY_DIRECTORY)) > 0) {
+						log.debug("Skipping current directory :"+directoryName);
 						continue;
 					}
 				}
@@ -148,6 +150,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 						log.info(CLASS_NAME + METHOD_NAME
 								+ "Current List of URLs are already processed");
 					} else if (index >= 0) {
+						log.info("Processing remaining URLs in the current directory :"+directoryName);
 						saveMails(secondaryURLList.subList(index,
 								secondaryURLList.size()), directoryName);
 						savePointResumed = true;
@@ -187,6 +190,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 										+ METHOD_NAME
 										+ "Current List of URLs are already processed");
 							} else if (index >= 0) {
+								log.info("Processing remaining URLs in the current directory :"+directoryName);
 								saveMails(subSecondaryURLList.subList(index,
 										subSecondaryURLList.size()),
 										directoryName);
@@ -224,7 +228,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	 * formats the raw URLs in appropriate format
 	 */
 	public List<String> fetchURLs(HtmlPage page, String xPath, String baseURL,
-			String regex) throws WebCrawlerServiceException {
+			String regex) {
 		List<String> urlList;
 		final String METHOD_NAME = "fetchURLs ";
 
@@ -243,60 +247,49 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 	/**
 	 * Retrieve the content based on URLs and save the content to file system
+	 * @throws IOException 
 	 */
 	public boolean saveMails(List<String> mailURLList, String directoryName)
-			throws WebCrawlerServiceException {
+			throws IOException {
 		boolean processedFlag = false;
 		final String METHOD_NAME = "saveMails ";
 		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
-		try {
-			for (String url : mailURLList) {
-				String fileName = "";
-				XmlPage page = webClient.getPage(url);
-				/*
-				 * //log.info(page.asXml()); List<?>
-				 * list=page.getByXPath("/mail"); if(list.get(0) instanceof
-				 * DomElement){ log.info(CLASS_NAME +
-				 * METHOD_NAME+i+((DomElement) list.get(0)).getAttribute("id"));
-				 * fileName=((DomElement) list.get(0)).getAttribute("id"); i++;
-				 * }
-				 */
 
-				fileName = url
-						.substring(url.indexOf("ajax/") + 5, url.length());
-				String path = appProp.getMailLocation() + directoryName + "/"
-						+ fileName;
-				File file = new File(path);
-				file.getParentFile().mkdirs();
-				file.createNewFile();
+		for (String url : mailURLList) {
+			String fileName = "";
+			XmlPage page = webClient.getPage(url);
+			/*
+			 * //log.info(page.asXml()); List<?> list=page.getByXPath("/mail");
+			 * if(list.get(0) instanceof DomElement){ log.info(CLASS_NAME +
+			 * METHOD_NAME+i+((DomElement) list.get(0)).getAttribute("id"));
+			 * fileName=((DomElement) list.get(0)).getAttribute("id"); i++; }
+			 */
 
-				FileWriter fw = new FileWriter(file.getAbsoluteFile());
-				BufferedWriter bw = new BufferedWriter(fw);
-				bw.write(page.asXml());
-				bw.close();
-				log.info(CLASS_NAME + METHOD_NAME + "Saved content from URL :"
-						+ url);
-				ApplicationCache.getInstance().setAppCacheValue(
-						WebCrawlerConstants.KEY_DIRECTORY
-								+ WebCrawlerConstants.KEY_VALUE_SEPERATOR,
-						directoryName);
-				ApplicationCache.getInstance().setAppCacheValue(
-						WebCrawlerConstants.KEY_URL
-								+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
-			}
-			log.info(CLASS_NAME + METHOD_NAME
-					+ "Saved all mails in the curret Page");
-			processedFlag = true;
-		} catch (MalformedURLException e) {
-			throw new WebCrawlerServiceException(new ErrorMessage(
-					e.getMessage(), e.getCause()));
-		} catch (IOException e) {
-			throw new WebCrawlerServiceException(new ErrorMessage(
-					e.getMessage(), e.getCause()));
-		} catch (Exception e) {
-			throw new WebCrawlerServiceException(new ErrorMessage(
-					e.getMessage(), e.getCause()));
+			fileName = url.substring(url.indexOf("ajax/") + 5, url.length());
+			String path = appProp.getMailLocation() + directoryName + "/"
+					+ fileName;
+			File file = new File(path);
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(page.asXml());
+			bw.close();
+			log.debug(CLASS_NAME + METHOD_NAME + "Saved content from URL :"
+					+ url);
+			ApplicationCache.getInstance().setAppCacheValue(
+					WebCrawlerConstants.KEY_DIRECTORY
+							+ WebCrawlerConstants.KEY_VALUE_SEPERATOR,
+					directoryName);
+			ApplicationCache.getInstance().setAppCacheValue(
+					WebCrawlerConstants.KEY_URL
+							+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
+			log.debug("Save point stored in Application cache !!");
 		}
+		log.info(CLASS_NAME + METHOD_NAME
+				+ "Saved all mails in the curret Page");
+		processedFlag = true;
 		return processedFlag;
 	}
 
@@ -369,7 +362,12 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public void savePoint() {
 		Hashtable<String, String> cache = ApplicationCache.getInstance()
 				.getAppCache();
-		String path = appProp.getSavePointLocation();
+		if((cache.size()==0)){
+			log.debug("No data available for Save Point in Application Cache !!!");
+			return;
+		}
+		String path = appProp.getSavePointLocation() + appProp.getYear()
+				+ appProp.getFileNameExtension();
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 		try {
@@ -384,6 +382,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 						+ WebCrawlerConstants.FIELD_SEPERATOR);
 			}
 			bw.close();
+			log.info("Save Point saved successfully to File System!!!");
 		} catch (IOException e) {
 			throw new WebCrawlerServiceException(new ErrorMessage(
 					e.getMessage(), e.getCause()));
@@ -410,42 +409,45 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 	/**
 	 * Retrieves the save point from file saved in previous execution
+	 * @throws IOException 
 	 */
-	public Hashtable<String, String> retrieveSavePoint() {
+	public Hashtable<String, String> retrieveSavePoint() throws IOException {
 		Hashtable<String, String> savePoint = new Hashtable<String, String>();
-		File file = new File(appProp.getSavePointLocation());
+		File file = new File(appProp.getSavePointLocation() + appProp.getYear()
+				+ appProp.getFileNameExtension());
 		if (!file.exists()) {
 			savePoint.put(WebCrawlerConstants.SAVE_POINT,
 					WebCrawlerConstants.SAVE_POINT_NO);
+			log.debug("No save point available to resume");
 			return savePoint;
 		}
-		try {
 
-			FileInputStream fstream = new FileInputStream(file);
-			DataInputStream in = new DataInputStream(fstream);
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
-
-			StringTokenizer st = new StringTokenizer(br.readLine(),
-					WebCrawlerConstants.FIELD_SEPERATOR);
-			while (st.hasMoreTokens()) {
-				String keyValuePair = st.nextToken();
-				int index = keyValuePair.indexOf(
-						WebCrawlerConstants.KEY_VALUE_SEPERATOR, 0);
-				String key = keyValuePair.substring(0, index);
-				String value = keyValuePair.substring(index + 1);
-				savePoint.put(key, value);
-			}
+		FileInputStream fstream = new FileInputStream(file);
+		DataInputStream in = new DataInputStream(fstream);
+		BufferedReader br = new BufferedReader(new InputStreamReader(in));
+		String s;
+		if ((s = br.readLine()) == null) {
+			savePoint.put(WebCrawlerConstants.SAVE_POINT,
+					WebCrawlerConstants.SAVE_POINT_NO);
 			br.close();
-		} catch (IOException e) {
-			throw new WebCrawlerServiceException(
-					new ErrorMessage("Error reading content of save point file"
-							+ e.getMessage(), e.getCause()));
-		} catch (Exception e) {
-			throw new WebCrawlerServiceException(new ErrorMessage(
-					e.getMessage(), e.getCause()));
+			log.debug("No data available in save point file !!!");
+			return savePoint;
 		}
+		StringTokenizer st = new StringTokenizer(s,
+				WebCrawlerConstants.FIELD_SEPERATOR);
+		while (st.hasMoreTokens()) {
+			String keyValuePair = st.nextToken();
+			int index = keyValuePair.indexOf(
+					WebCrawlerConstants.KEY_VALUE_SEPERATOR, 0);
+			String key = keyValuePair.substring(0, index);
+			String value = keyValuePair.substring(index + 1);
+			savePoint.put(key, value);
+		}
+		br.close();
+
 		savePoint.put(WebCrawlerConstants.SAVE_POINT,
 				WebCrawlerConstants.SAVE_POINT_YES);
+		log.info("Save point retrieved successfully");
 		return savePoint;
 	}
 }
