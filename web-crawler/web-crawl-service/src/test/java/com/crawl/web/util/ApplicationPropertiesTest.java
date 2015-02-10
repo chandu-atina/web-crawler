@@ -7,13 +7,14 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.crawl.web.entry.Crawler;
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
 /**
  * Test Class to test whether application properties
  * are loaded successfully or not
  *
  */
-public class ApplicationPropertiesTest extends TestCase{
+public class ApplicationPropertiesTest{
 	
 	private static final String CONFIG_PATH = "classpath:Application-config-crawler.xml";
 
@@ -29,6 +30,6 @@ public class ApplicationPropertiesTest extends TestCase{
 				CONFIG_PATH);
 		final ApplicationProperties appProp = context.getBean(ApplicationProperties.class);
 		boolean flag=appProp.toString().contains("null");
-		assertFalse("Application Properties are not loaded successfully",flag);
+		Assert.assertFalse("Application Properties are not loaded successfully",flag);
 	}
 }
