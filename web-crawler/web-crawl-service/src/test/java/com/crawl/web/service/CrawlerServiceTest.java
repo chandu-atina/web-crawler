@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.crawl.web.exception.WebCrawlerServiceException;
 import com.crawl.web.service.impl.WebCrawlerServiceImpl;
 import com.crawl.web.util.ApplicationProperties;
 
@@ -31,5 +32,14 @@ public class CrawlerServiceTest {
 		final CrawlerService crawler = context.getBean(WebCrawlerServiceImpl.class);
 		//crawler.processRequest();
 		//Assert.assertFalse("Application Properties are not loaded successfully",flag);
+	}
+	
+	@Test (expected = WebCrawlerServiceException.class)
+	public void testTest(){
+		final ApplicationContext context = new ClassPathXmlApplicationContext(
+				CONFIG_PATH);
+		final CrawlerService crawler = context.getBean(WebCrawlerServiceImpl.class);
+		crawler.test();
+		
 	}
 }
