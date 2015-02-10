@@ -7,7 +7,6 @@ import org.junit.runners.Suite.SuiteClasses;
 import com.crawl.web.service.CrawlerServiceTest;
 import com.crawl.web.service.impl.WebCrawlerServiceImplTest;
 import com.crawl.web.util.ApplicationPropertiesTest;
-import com.crawl.web.util.URLFormatterTest;
 /**
  * Test suite to run all the test cases in single go
  * @author chandrasekhara
@@ -15,7 +14,7 @@ import com.crawl.web.util.URLFormatterTest;
  */
 @RunWith(Suite.class)
 @SuiteClasses({ WebCrawlerServiceImplTest.class, CrawlerServiceTest.class,
-		ApplicationPropertiesTest.class, URLFormatterTest.class })
+		ApplicationPropertiesTest.class })
 public class AllTests {
 
 }
