@@ -93,7 +93,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			/*
 			 * Fetch the save point from file
 			 */
-			savePoint = retrieveSavePoint();
+			savePoint = retrieveSavePoint(false);
 			boolean savePointResumed = false;
 
 			/*
@@ -225,7 +225,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			throw new WebCrawlerServiceException(new ErrorMessage(
 					e.getMessage(), e.getCause()));
 		} finally {
-			savePoint();
+			savePoint(false);
 		}
 	}
 
@@ -365,7 +365,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	/**
 	 * Stores a save point in a flat file to resume for the next execution
 	 */
-	public void savePoint() {
+	public void savePoint(boolean testFlag) {
 		Hashtable<String, String> cache = ApplicationCache.getInstance()
 				.getAppCache();
 		final String METHOD_NAME = "savePoint - ";
@@ -374,8 +374,14 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					+ "No data available for Save Point in Application Cache !!!");
 			return;
 		}
-		String path = appProp.getSavePointLocation() + appProp.getYear()
-				+ appProp.getFileNameExtension();
+		String path="";
+		if(testFlag){
+			path = appProp.getSavePointLocation() + "test"
+					+ appProp.getFileNameExtension();
+		}else{
+			path = appProp.getSavePointLocation() + appProp.getYear()
+					+ appProp.getFileNameExtension();
+		}
 		File file = new File(path);
 		file.getParentFile().mkdirs();
 		try {
@@ -420,11 +426,18 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	 * Retrieves the save point from file saved in previous execution
 	 * @throws IOException 
 	 */
-	public Hashtable<String, String> retrieveSavePoint() throws IOException {
+	public Hashtable<String, String> retrieveSavePoint(boolean testFlag) throws IOException {
 		Hashtable<String, String> savePoint = new Hashtable<String, String>();
 		final String METHOD_NAME="retrieveSavePoint - ";
-		File file = new File(appProp.getSavePointLocation() + appProp.getYear()
-				+ appProp.getFileNameExtension());
+		String path;
+		if(testFlag){
+			path = appProp.getSavePointLocation() + "test"
+					+ appProp.getFileNameExtension();
+		}else{
+			path = appProp.getSavePointLocation() + appProp.getYear()
+					+ appProp.getFileNameExtension();
+		}
+		File file = new File(path);
 		if (!file.exists()) {
 			savePoint.put(WebCrawlerConstants.SAVE_POINT,
 					WebCrawlerConstants.SAVE_POINT_NO);

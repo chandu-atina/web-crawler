@@ -70,10 +70,10 @@ public class WebCrawlerServiceImplTest{
 		ApplicationCache.getInstance().setAppCacheValue(
 				WebCrawlerConstants.KEY_URL
 						+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
-		crawler.savePoint();
+		crawler.savePoint(true);
 		Hashtable<String, String> savePoint = new Hashtable<String, String>();
 		try {
-			savePoint=crawler.retrieveSavePoint();
+			savePoint=crawler.retrieveSavePoint(true);
 		} catch (IOException e) {
 			Assert.fail("Failed to retrieve save point !!!"+e.getLocalizedMessage());
 		}
