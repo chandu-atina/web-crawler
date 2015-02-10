@@ -23,7 +23,7 @@
 					<archive>
 						<manifest>
 						 	<addClasspath>true</addClasspath>
-							<mainClass>com.crawl.web.service.Test</mainClass>
+							<mainClass>com.crawl.web.entry.Crawler</mainClass>
 						</manifest>
 						<manifestEntries>
 						 <!-- 	<Class-Path>classes/lib/</Class-Path>  -->
