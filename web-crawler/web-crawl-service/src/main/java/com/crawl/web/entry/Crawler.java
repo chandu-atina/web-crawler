@@ -33,7 +33,7 @@ public class Crawler {
 					CONFIG_PATH);
 			final Crawler crawler = context.getBean(Crawler.class);
 			log.info("Staring Crawler !!!");
-			boolean processedFlag=crawler.crawlWebPage("http://mail-archives.apache.org/mod_mbox/maven-users/");
+			boolean processedFlag=crawler.crawlWebPage();
 			if(processedFlag){
 				log.info("Crawling completed successfully");
 			}
@@ -47,8 +47,8 @@ public class Crawler {
 	/**
 	 * non-static class which actually calls the crawling mechanism
 	 */
-	public boolean crawlWebPage(String url) {
-		webCrawler.processRequest(url);
+	public boolean crawlWebPage() {
+		webCrawler.processRequest();
 		//webCrawler.test();
 		return true;
 	}

@@ -70,7 +70,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	/**
 	 * Process the URL and save all mails linked to the URL.
 	 */
-	public void processRequest(String url1) throws WebCrawlerServiceException {
+	public void processRequest() throws WebCrawlerServiceException {
 		final String METHOD_NAME = "processRequest - ";
 		try {
 
@@ -308,7 +308,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 	public static void main(String args[]) {
 		WebCrawlerServiceImpl crawl = new WebCrawlerServiceImpl();
-		crawl.processRequest("sample");
+		crawl.processRequest();
 	}
 
 	/**

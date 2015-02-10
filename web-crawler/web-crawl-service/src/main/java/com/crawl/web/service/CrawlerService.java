@@ -17,7 +17,7 @@ import com.crawl.web.util.exception.WebCrawlerServiceException;
  */
 public interface CrawlerService {
 
-	public void processRequest(String URL) throws WebCrawlerServiceException;
+	public void processRequest() throws WebCrawlerServiceException;
 	
 	public void test();
 
