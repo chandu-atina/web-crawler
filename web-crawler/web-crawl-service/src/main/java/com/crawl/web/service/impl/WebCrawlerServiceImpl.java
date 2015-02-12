@@ -19,6 +19,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +32,7 @@ import org.springframework.stereotype.Service;
 
 import com.crawl.web.service.CrawlerService;
 import com.crawl.web.util.ApplicationProperties;
+import com.crawl.web.util.GenericApplicationCache;
 import com.crawl.web.util.URLFormatter;
 import com.crawl.web.constants.WebCrawlerConstants;
 import com.crawl.web.exception.WebCrawlerServiceException;
@@ -56,6 +58,9 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 	@Autowired
 	ApplicationProperties appProp;
+	
+	@Autowired
+	GenericApplicationCache appCache;
 
 	/**
 	 * logger class
@@ -66,9 +71,29 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	 * HashTable used to load the save point parameters
 	 */
 	Hashtable<String, String> savePoint;
-
+	
+	/**
+	 * Indicates whether savePoint is resumed or not.
+	 */
+	public boolean savePointResumed = false;
+	
 	/**
 	 * Process the URL and save all mails linked to the URL.
+	 * It overrides the default year and mailLocation with
+	 * the arguments passed to the  method
+	 */
+	public void processRequest(String year, String mailLocation) throws WebCrawlerServiceException {
+		appProp.setYear(year);
+		appProp.setMailLocation(mailLocation);
+		processRequest();
+	}
+	
+	/**
+	 * Process the URL and save all mails linked to the URL.
+	 * This method crawls the default year and save the mails
+	 * to default location.
+	 * Default Year : 2014
+	 * Default Location : /var/tmp/mails
 	 */
 	public void processRequest() throws WebCrawlerServiceException {
 		final String METHOD_NAME = "processRequest - ";
@@ -94,7 +119,6 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			 * Fetch the save point from file
 			 */
 			savePoint = retrieveSavePoint(false);
-			boolean savePointResumed = false;
 
 			/*
 			 * Fetch the primary list of urls in the first page Later traverse
@@ -129,91 +153,11 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 				/* will wait JavaScript to execute up to 30s */
 				webClient.waitForBackgroundJavaScript(30 * 1000);
-				String secondaryXPath = ".//*[@id[contains(string(),'msg-')]]/td[2]/a";
-				String secondaryRegex = "ajax.*%3E";
-
-				/* Fetch all the email links in the second page */
-				List<String> secondaryURLList = fetchURLs(page, secondaryXPath,
-						mprimaryURL.substring(0,
-								mprimaryURL.lastIndexOf("/") + 1),
-						secondaryRegex);
-
-				/* Check for save point */
-				int index = 0;
-				if (savePoint.get(WebCrawlerConstants.SAVE_POINT).equals(
-						WebCrawlerConstants.SAVE_POINT_YES)
-						&& !savePointResumed) {
-					index = secondaryURLList.indexOf(savePoint
-							.get(WebCrawlerConstants.KEY_URL));
-					if (index < 0) {
-						log.info("Method:" + METHOD_NAME
-								+ "Current List of URLs are already processed");
-					} else if (index >= 0) {
-						log.info("Method:" + METHOD_NAME
-								+ "Processing remaining URLs in the current directory :"+directoryName);
-						saveMails(secondaryURLList.subList(index,
-								secondaryURLList.size()), directoryName);
-						savePointResumed = true;
-					}
-				} else {
-					log.info("Method:" + METHOD_NAME
-							+ "Processing URLs in the current directory :"+directoryName);
-					saveMails(secondaryURLList, directoryName);
-				}
-
-				/* Check for pagination and fetch all the other URLs */
-				while (true) {
-					try {
-						final HtmlAnchor anchor = page
-								.getAnchorByText("Next »");
-						HtmlPage subPage = anchor.click();
-						webClient
-								.setAjaxController(new NicelyResynchronizingAjaxController());
-						webClient.waitForBackgroundJavaScript(30 * 1000);
-
-						/*
-						 * Fetch all the email links by nagivating through
-						 * pagination in the second page
-						 */
-						List<String> subSecondaryURLList = fetchURLs(
-								subPage,
-								secondaryXPath,
-								mprimaryURL.substring(0,
-										mprimaryURL.lastIndexOf("/") + 1),
-								secondaryRegex);
-						if (savePoint.get(WebCrawlerConstants.SAVE_POINT)
-								.equals(WebCrawlerConstants.SAVE_POINT_YES)
-								&& !savePointResumed) {
-							index = subSecondaryURLList.indexOf(savePoint
-									.get(WebCrawlerConstants.KEY_URL));
-
-							if (index < 0) {
-								log.info("Method:"
-										+ METHOD_NAME
-										+ "Current List of URLs are already processed");
-							} else if (index >= 0) {
-								log.info("Method:" + METHOD_NAME
-										+ "Processing remaining URLs in the current directory :"+directoryName);
-								saveMails(subSecondaryURLList.subList(index,
-										subSecondaryURLList.size()),
-										directoryName);
-								savePointResumed = true;
-							}
-						} else {
-							log.info("Method:" + METHOD_NAME
-									+ "Processing URLs in the current directory :"+directoryName);
-							saveMails(subSecondaryURLList, directoryName);
-						}
-						page = subPage;
-
-					} catch (ElementNotFoundException e) {
-
-						/* Indicates end of pagination */
-						log.info("Method:" + METHOD_NAME
-								+ " End of Pagination");
-						break;
-					}
-				}
+				
+				/* Process each and every URL
+				 * Check for pagination and processes those URLs as well
+				 */
+				processURLs(page, mprimaryURL, directoryName, webClient);
 			}
 		} catch (MalformedURLException e) {
 			throw new WebCrawlerServiceException(new ErrorMessage(
@@ -226,6 +170,71 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 					e.getMessage(), e.getCause()));
 		} finally {
 			savePoint(false);
+		}
+	}
+	
+	public void processURLs(HtmlPage page, String mprimaryURL,
+			String directoryName, WebClient webClient) throws IOException {
+		String secondaryXPath = ".//*[@id[contains(string(),'msg-')]]/td[2]/a";
+		String secondaryRegex = "ajax.*%3E";
+		final String METHOD_NAME = "processURLs -";
+		List<String> secondaryURLList = new ArrayList<String>();
+		
+		/* Check for pagination and fetch all the other URLs */
+		while (true) {
+			try {
+				
+				/* Fetch all the email links in the second page */
+
+				List<String> subSecondaryURLList = fetchURLs(page, secondaryXPath,
+						mprimaryURL.substring(0, mprimaryURL.lastIndexOf("/") + 1),
+						secondaryRegex);
+				
+				secondaryURLList.addAll(subSecondaryURLList);
+
+				/*
+				 * Fetch all the email links by nagivating through pagination in
+				 * the second page
+				 */
+				final HtmlAnchor anchor = page.getAnchorByText("Next »");
+				page = anchor.click();
+				webClient
+						.setAjaxController(new NicelyResynchronizingAjaxController());
+				webClient.waitForBackgroundJavaScript(30 * 1000);
+
+			} catch (ElementNotFoundException e) {
+
+				/* Indicates end of pagination */
+				log.info("Method:" + METHOD_NAME + " End of Pagination");
+				break;
+			}
+
+		}
+
+		/* Check for save point */
+		int index = 0;
+		if (savePoint.get(WebCrawlerConstants.SAVE_POINT).equals(
+				WebCrawlerConstants.SAVE_POINT_YES)
+				&& !savePointResumed) {
+			index = secondaryURLList.indexOf(savePoint
+					.get(WebCrawlerConstants.KEY_URL));
+			if (index < 0) {
+				log.info("Method:" + METHOD_NAME
+						+ "Current List of URLs are already processed");
+			} else if (index >= 0) {
+				log.info("Method:"
+						+ METHOD_NAME
+						+ "Processing remaining URLs in the current directory :"
+						+ directoryName);
+				saveMails(secondaryURLList.subList(index,
+						secondaryURLList.size()), directoryName);
+				savePointResumed = true;
+			}
+		} else {
+			log.info("Method:" + METHOD_NAME
+					+ "Processing URLs in the current directory :"
+					+ directoryName);
+			saveMails(secondaryURLList, directoryName);
 		}
 	}
 
@@ -281,13 +290,13 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			BufferedWriter bw = new BufferedWriter(fw);
 			bw.write(page.asXml());
 			bw.close();
-			log.debug("Method:" + METHOD_NAME + "Saved content from URL :"
+			log.info("Method:" + METHOD_NAME + "Saved content from URL :"
 					+ url);
-			ApplicationCache.getInstance().setAppCacheValue(
+			appCache.setAppCacheValue(
 					WebCrawlerConstants.KEY_DIRECTORY
 							+ WebCrawlerConstants.KEY_VALUE_SEPERATOR,
 					directoryName);
-			ApplicationCache.getInstance().setAppCacheValue(
+			appCache.setAppCacheValue(
 					WebCrawlerConstants.KEY_URL
 							+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
 			log.debug("Method:" + METHOD_NAME
@@ -328,7 +337,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 
 	/**
 	 * static inner class for maintaining cache
-	 */
+	 *//*
 	static class ApplicationCache {
 		private static ApplicationCache appCache = new ApplicationCache();
 		private Hashtable<String, String> appCacheData = new Hashtable<String, String>();
@@ -361,13 +370,12 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 			appCacheData.put(key, value);
 		}
 	}
-
+*/
 	/**
 	 * Stores a save point in a flat file to resume for the next execution
 	 */
 	public void savePoint(boolean testFlag) {
-		Hashtable<String, String> cache = ApplicationCache.getInstance()
-				.getAppCache();
+		Hashtable<String, String> cache = appCache.getAppCacheData();
 		final String METHOD_NAME = "savePoint - ";
 		if((cache.size()==0)){
 			log.debug("Method:" + METHOD_NAME
@@ -475,5 +483,19 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 		log.info("Method:" + METHOD_NAME
 				+ "Save point retrieved successfully");
 		return savePoint;
+	}
+
+	/**
+	 * @return the appCache
+	 */
+	public GenericApplicationCache getAppCache() {
+		return appCache;
+	}
+
+	/**
+	 * @param appCache the appCache to set
+	 */
+	public void setAppCache(GenericApplicationCache appCache) {
+		this.appCache = appCache;
 	}
 }
