@@ -33,7 +33,8 @@ public class Crawler {
 					CONFIG_PATH);
 			final Crawler crawler = context.getBean(Crawler.class);
 			log.info("Staring Crawler !!!");
-			boolean processedFlag=crawler.crawlWebPage();
+			log.info(args.length);
+			boolean processedFlag=crawler.crawlWebPage(args);
 			if(processedFlag){
 				log.info("Crawling completed successfully");
 			}
@@ -45,11 +46,25 @@ public class Crawler {
 	}
 	
 	/**
-	 * non-static class which actually calls the crawling mechanism
+	 * non-static method which calls the crawling mechanism
 	 */
 	public boolean crawlWebPage() {
 		webCrawler.processRequest();
 		//webCrawler.test();
+		return true;
+	}
+	
+	/**
+	 * overloaded non-static method which calls the crawling mechanism
+	 * based on input arguments
+	 */
+	public boolean crawlWebPage(String args[]) {
+		
+		if(args.length==2){
+			webCrawler.processRequest(args[0],args[1]);
+		}else{
+			webCrawler.processRequest();
+		}
 		return true;
 	}
 	/**
