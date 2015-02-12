@@ -12,7 +12,6 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.crawl.web.constants.WebCrawlerConstants;
 import com.crawl.web.service.CrawlerService;
-import com.crawl.web.service.impl.WebCrawlerServiceImpl.ApplicationCache;
 
 import junit.framework.Assert;
 import junit.framework.TestCase;
@@ -63,11 +62,11 @@ public class WebCrawlerServiceImplTest{
 		String directoryName="testDirectory";
 		String url="http://mail-archives.apache.org/mod_mbox/maven-users/201409.mbox/ajax/%3C20140902102202.F09D011C00B4%40dd12814.kasserver.com%3E";
 		
-		ApplicationCache.getInstance().setAppCacheValue(
+		crawler.getAppCache().setAppCacheValue(
 				WebCrawlerConstants.KEY_DIRECTORY
 						+ WebCrawlerConstants.KEY_VALUE_SEPERATOR,
 				directoryName);
-		ApplicationCache.getInstance().setAppCacheValue(
+		crawler.getAppCache().setAppCacheValue(
 				WebCrawlerConstants.KEY_URL
 						+ WebCrawlerConstants.KEY_VALUE_SEPERATOR, url);
 		crawler.savePoint(true);
