@@ -19,6 +19,8 @@ public interface CrawlerService {
 
 	public void processRequest() throws WebCrawlerServiceException;
 	
+	public void processRequest(String year, String mailLocation) throws WebCrawlerServiceException;
+	
 	public void test();
 
 }
