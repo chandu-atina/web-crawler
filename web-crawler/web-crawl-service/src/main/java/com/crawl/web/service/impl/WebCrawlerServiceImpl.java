@@ -50,7 +50,7 @@ import com.gargoylesoftware.htmlunit.xml.XmlPage;
  * WebCrawlerServiceImpl class has a few service methods that are helpful to
  * crawl a given URL and save all the mail contents to a flat file.
  */
-@Service
+@Service("WebCrawlerServiceImpl")
 public class WebCrawlerServiceImpl implements CrawlerService {
 
 	@Autowired
