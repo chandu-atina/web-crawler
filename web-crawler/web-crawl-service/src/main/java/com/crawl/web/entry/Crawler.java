@@ -1,11 +1,12 @@
 package com.crawl.web.entry;
 
+import java.util.Calendar;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
-
 import com.crawl.web.exception.WebCrawlerServiceException;
 import com.crawl.web.service.CrawlerService;
 /**
@@ -22,6 +23,7 @@ public class Crawler {
 	private static final String CONFIG_PATH = "classpath:Application-config-crawler.xml";
 
 	@Autowired
+	@Qualifier("MultiThreadedWebCrawlerServiceImpl")
 	CrawlerService webCrawler;
 	
 	/**
@@ -33,10 +35,13 @@ public class Crawler {
 					CONFIG_PATH);
 			final Crawler crawler = context.getBean(Crawler.class);
 			log.info("Staring Crawler !!!");
-			log.info(args.length);
+			long startTime =Calendar.getInstance().getTimeInMillis();
+			log.info("No. of arguments supplied :"+args.length);
 			boolean processedFlag=crawler.crawlWebPage(args);
 			if(processedFlag){
 				log.info("Crawling completed successfully");
+				long endTime =Calendar.getInstance().getTimeInMillis();
+				log.info("Total Time Taken :"+(endTime-startTime)+" milli seconds");
 			}
 			// crawler.processRequest("http://mail-archives.apache.org/mod_mbox/maven-users/");
 		} catch (WebCrawlerServiceException e) {
