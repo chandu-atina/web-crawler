@@ -61,6 +61,7 @@ public class WebCrawlerServiceException extends ServiceException
 	}
 	
 	public WebCrawlerServiceException(ErrorMessages errors) {
+		super(errors.toString());
 		if(errors != null) {
 			this.errors = errors;
 		}
@@ -73,6 +74,7 @@ public class WebCrawlerServiceException extends ServiceException
 	 * @param error
 	 */
 	public WebCrawlerServiceException(ErrorMessage error) {
+		super(error.toString());
 		this.getErrors().addError(error);
 	}
 		
