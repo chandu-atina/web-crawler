@@ -15,6 +15,8 @@ public class WebCrawlerConstants {
 	
 	public static String KEY_VALUE_SEPERATOR=":";
 	
+	public static String THREAD_KEY_SEPERATOR="-";
+	
 	public static String KEY_DIRECTORY="DIRECTORY";
 	
 	public static String KEY_URL="URL";
