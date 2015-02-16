@@ -10,7 +10,6 @@ package com.crawl.web.util;
  *  03/02/2015		03/02/2015		chandu-atina 	initial skeleton creation
  */
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

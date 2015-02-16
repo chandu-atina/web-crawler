@@ -11,10 +11,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.crawl.web.constants.WebCrawlerConstants;
-import com.crawl.web.service.CrawlerService;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 
 public class WebCrawlerServiceImplTest{
 	

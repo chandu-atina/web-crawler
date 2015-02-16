@@ -1,6 +1,5 @@
 package com.crawl.web.service;
 
-import java.util.Hashtable;
 
 import com.crawl.web.util.exception.WebCrawlerServiceException;
 

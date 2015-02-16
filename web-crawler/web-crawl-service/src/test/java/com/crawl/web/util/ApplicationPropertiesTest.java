@@ -1,14 +1,11 @@
 package com.crawl.web.util;
 
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.crawl.web.entry.Crawler;
 
 import junit.framework.Assert;
-import junit.framework.TestCase;
 /**
  * Test Class to test whether application properties
  * are loaded successfully or not
