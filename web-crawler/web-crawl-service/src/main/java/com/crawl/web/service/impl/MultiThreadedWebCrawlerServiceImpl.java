@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -28,10 +29,17 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.xml.soap.Node;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.crawl.web.service.CrawlerService;
 import com.crawl.web.util.ApplicationProperties;
@@ -44,6 +52,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.ElementNotFoundException;
 import com.gargoylesoftware.htmlunit.NicelyResynchronizingAjaxController;
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.DomElement;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.xml.XmlPage;
@@ -78,6 +87,10 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	 * Indicates whether savePoint is resumed or not.
 	 */
 	public boolean savePointResumed = false;
+
+	Pattern subjectPattern = Pattern.compile(".*: (.+)$");
+
+	Pattern orgPattern = Pattern.compile("@(.*?)>");
 
 	/**
 	 * Process the URL and save all mails linked to the URL. It overrides the
@@ -170,9 +183,13 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 
 		final String METHOD_NAME = "processURLs -";
 		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+		WebClient ajaxWebClient = new WebClient(BrowserVersion.FIREFOX_24);
 		log.info("Method:" + METHOD_NAME + " Loading page now: " + mprimaryURL);
 		HtmlPage page = webClient.getPage(mprimaryURL);
-
+		int i = 0;
+		XmlPage xmlPage = ajaxWebClient.getPage(mprimaryURL.substring(0,
+				mprimaryURL.length() - 7) + "ajax/thread?" + i);
+		retriveTopics(xmlPage);
 		/* will wait JavaScript to execute up to 30s */
 		webClient.waitForBackgroundJavaScript(30 * 1000);
 
@@ -184,6 +201,7 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 		/* Check for pagination and fetch all the other URLs */
 		while (true) {
 			try {
+				i++;
 
 				/* Fetch all the email links in the second page */
 
@@ -203,6 +221,9 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 				webClient
 						.setAjaxController(new NicelyResynchronizingAjaxController());
 				webClient.waitForBackgroundJavaScript(30 * 1000);
+				xmlPage = ajaxWebClient.getPage(mprimaryURL.substring(0,
+						mprimaryURL.length() - 7) + "ajax/thread?" + i);
+				retriveTopics(xmlPage);
 
 			} catch (ElementNotFoundException e) {
 
@@ -272,6 +293,7 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 		boolean processedFlag = false;
 		final String METHOD_NAME = "saveMails - ";
 		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
+		String mailId = "";
 
 		for (String url : mailURLList) {
 			String fileName = "";
@@ -286,6 +308,39 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 
 			FileWriter fw = new FileWriter(file.getAbsoluteFile());
 			BufferedWriter bw = new BufferedWriter(fw);
+
+			DomElement e = page.getDocumentElement();
+			mailId = java.net.URLDecoder.decode(e.getAttribute("id"), "UTF-8");
+			String subject = StringEscapeUtils.unescapeHtml4(e
+					.getElementsByTagName("subject").item(0).getTextContent());
+			String organisation = "";
+
+			Matcher orgMatcher = orgPattern.matcher(mailId);
+			Matcher topicMatcher;
+			if (subject.contains(": ")) {
+				topicMatcher = subjectPattern.matcher(subject);
+				if (topicMatcher.find()) {
+					subject = topicMatcher.group(1);
+				}
+			}
+
+			if (orgMatcher.find()) {
+				organisation = orgMatcher.group(1);
+			}
+			if (appCache.getOrganisationList().containsKey(organisation)) {
+				if (appCache.getOrganisationList().get(organisation)
+						.contains(subject)) {
+
+				} else {
+					appCache.getOrganisationList().get(organisation)
+							.add(subject);
+				}
+			} else {
+				ArrayList<String> topicList = new ArrayList<String>();
+				topicList.add(subject);
+				appCache.getOrganisationList().put(organisation, topicList);
+			}
+
 			bw.write(page.asXml());
 			bw.close();
 			log.info("Method:" + METHOD_NAME + "Thread Name :" + threadName
@@ -316,8 +371,11 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	}
 
 	public static void main(String args[]) {
-		WebCrawlerServiceImpl crawl = new WebCrawlerServiceImpl();
-		crawl.processRequest();
+		// WebCrawlerServiceImpl crawl = new WebCrawlerServiceImpl();
+		// crawl.processRequest();
+		System.out
+				.println(StringEscapeUtils
+						.unescapeHtml4("%3c00b201cf0b07$a919a320$fb4ce960$@eclipse.co.uk%3e"));
 	}
 
 	/**
@@ -340,6 +398,9 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	 */
 	public void savePoint(boolean testFlag) {
 		Hashtable<String, String> cache = appCache.getAppCacheData();
+		HashMap<String, ArrayList<String>> organisationList = appCache
+				.getOrganisationList();
+		// Set<String> topicSet=appCache.getTopicSet();
 		final String METHOD_NAME = "savePoint - ";
 		if ((cache.size() == 0)) {
 			log.debug("Method:"
@@ -348,14 +409,20 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 			return;
 		}
 		String path = "";
+		String orgFilePath = "";
 		if (testFlag) {
 			path = appProp.getSavePointLocation() + "test"
 					+ appProp.getFileNameExtension();
+			orgFilePath = appProp.getSavePointLocation() + "test"
+					+ appProp.getOrgFileNameExtension();
 		} else {
 			path = appProp.getSavePointLocation() + appProp.getYear()
 					+ appProp.getFileNameExtension();
+			orgFilePath = appProp.getSavePointLocation() + appProp.getYear()
+					+ appProp.getOrgFileNameExtension();
 		}
 		File file = new File(path);
+		File orgListFile = new File(orgFilePath);
 		file.getParentFile().mkdirs();
 		try {
 			file.createNewFile();
@@ -368,6 +435,20 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 				bw.write(key + cache.get(key)
 						+ WebCrawlerConstants.FIELD_SEPERATOR);
 			}
+			bw.flush();
+
+			FileWriter orgFileWriter = new FileWriter(
+					orgListFile.getAbsoluteFile());
+			bw = new BufferedWriter(orgFileWriter);
+			keySet = organisationList.keySet();
+			it = keySet.iterator();
+			while (it.hasNext()) {
+				String key = it.next();
+				bw.write("Organisation : " + key + "\nNo.of Topics : "
+						+ organisationList.get(key).size() + "\nTopics : "
+						+ organisationList.get(key).toString() + "\n\n");
+			}
+
 			bw.close();
 			log.info("Method:" + METHOD_NAME
 					+ "Save Point saved successfully to File System!!!");
@@ -464,6 +545,52 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	 */
 	public void setAppCache(GenericApplicationCache appCache) {
 		this.appCache = appCache;
+	}
+
+	public void retriveTopics(XmlPage xmlpage) {
+		// log.info(xmlpage.asXml());
+		Document doc = xmlpage.getXmlDocument();
+
+		NodeList nList = doc.getElementsByTagName("message");
+		for (int temp = 0; temp < nList.getLength(); temp++) {
+			org.w3c.dom.Node nNode = nList.item(temp);
+			log.info("\nCurrent Element :" + nNode.getNodeName());
+			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
+
+				Element eElement = (Element) nNode;
+				if (Integer.parseInt(eElement.getAttribute("depth")) == 0) {
+					if (Integer.parseInt(eElement.getAttribute("linked")) == 1) {
+						appCache.getTopicSet().add(
+								eElement.getElementsByTagName("subject")
+										.item(0).getTextContent());
+					} else {
+
+						Matcher matcher = subjectPattern
+								.matcher(StringEscapeUtils
+										.unescapeHtml4(eElement
+												.getElementsByTagName("subject")
+												.item(0).getTextContent()));
+						if (matcher.find()) {
+							String topic = matcher.group(1);
+							appCache.getTopicSet().add(topic);
+						}
+					}
+				}
+				log.debug("Depth id : " + eElement.getAttribute("depth"));
+				log.debug("Depth id : " + eElement.getAttribute("linked"));
+
+				log.debug("From Name : "
+						+ eElement.getElementsByTagName("from").item(0)
+								.getTextContent());
+				log.debug("Date Name : "
+						+ eElement.getElementsByTagName("date").item(0)
+								.getTextContent());
+				log.debug("Subject Name : "
+						+ eElement.getElementsByTagName("subject").item(0)
+								.getTextContent());
+
+			}
+		}
 	}
 
 	/**
