@@ -37,6 +37,13 @@ public class ApplicationProperties {
 	 * indicates the save point file extension 
 	 */
 	private String fileNameExtension;
+	
+	/**
+	 * indicates the list of organizations and no.of
+	 * users from each organization participating in
+	 * the forums 
+	 */
+	private String orgFileNameExtension;
 
 	/**
 	 * @return the webURL
@@ -109,12 +116,28 @@ public class ApplicationProperties {
 	}
 	
 	/**
+	 * @return the orgFileNameExtension
+	 */
+	public String getOrgFileNameExtension() {
+		return orgFileNameExtension;
+	}
+	
+	/**
+	 * @param orgFileNameExtension the orgFileNameExtension to set
+	 */
+	public void setOrgFileNameExtension(String orgFileNameExtension) {
+		this.orgFileNameExtension = orgFileNameExtension;
+	}
+
+	/**
 	 * @return all properties appended as a string
 	 */
 	public String toString() {
 		return "WEB_URL :" + this.webURL + " FILE_NAME_EXTENSION :"
 				+ this.fileNameExtension + " MAIL_LOCATION :"
 				+ this.mailLocation + " SAVE_POINT_LOCATION :"
-				+ this.savePointLocation + "YEAR :" + this.year;
+				+ this.savePointLocation + "YEAR :"
+				+ this.year + "ORGANIZATION_FILE_NAME_EXTENSION :"
+				+ this.orgFileNameExtension;
 	}
 }

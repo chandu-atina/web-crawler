@@ -1,6 +1,10 @@
 package com.crawl.web.util;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 /**
@@ -13,6 +17,10 @@ import org.springframework.stereotype.Component;
 public class GenericApplicationCache {
 
 	private Hashtable<String, String> appCacheData = new Hashtable<String, String>();
+	
+	private HashMap<String,ArrayList<String>> organisationList= new HashMap<String,ArrayList<String>>();
+	
+	private Set<String> topicSet= new HashSet<String>();
 
 	/**
 	 * @return the appCacheData
@@ -39,4 +47,23 @@ public class GenericApplicationCache {
 	public void setAppCacheValue(String key, String value) {
 		appCacheData.put(key, value);
 	}
+	
+
+	public HashMap<String, ArrayList<String>> getOrganisationList() {
+		return organisationList;
+	}
+
+	public void setOrganisationList(
+			HashMap<String, ArrayList<String>> organisationList) {
+		this.organisationList = organisationList;
+	}
+
+	public Set<String> getTopicSet() {
+		return topicSet;
+	}
+
+	public void setTopicSet(Set<String> topicSet) {
+		this.topicSet = topicSet;
+	}
+	
 }
