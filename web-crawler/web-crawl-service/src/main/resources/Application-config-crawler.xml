@@ -19,6 +19,7 @@
 		<property name="savePointLocation" value="${SAVE_POINT_LOCATION}" />
 		<property name="year" value="${YEAR}" />
 		<property name="fileNameExtension" value="${FILE_NAME_EXTENSION}" />
+		<property name="orgFileNameExtension" value="${ORGANIZATION_FILE_NAME_EXTENSION}" />
 	</bean>
 
 </beans>
