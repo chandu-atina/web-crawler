@@ -33,6 +33,19 @@ public class URLFormatter {
 		}
 		return urlList;
 	}
+	
+	public List<String> getURLList(String baseURL, List<?> realtiveXpathURL) {
+		List<String> urlList = new ArrayList<String>();
+		String regex=".*href=\"(.+?)\"";
+		Pattern p = Pattern.compile(regex);
+		for (Object obj : realtiveXpathURL) {
+			Matcher m = p.matcher(obj.toString());
+			if (m.find()) {
+				urlList.add(baseURL + m.group(1));
+			}
+		}
+		return urlList;
+	}
 
 	public static void main(String args[]) {
 		URLFormatter urlFormat = new URLFormatter();
