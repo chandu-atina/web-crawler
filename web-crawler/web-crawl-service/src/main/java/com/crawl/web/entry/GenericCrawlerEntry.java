@@ -1,4 +1,4 @@
-package com.crawl.web.entry;
+/*package com.crawl.web.entry;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,12 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.crawl.web.exception.WebCrawlerServiceException;
 import com.crawl.web.service.CrawlerService;
-/**
+*//**
  * Crawler is a entry point for crawling a web URL.
  * This is a main class which is automatically picked from
  * jar when executed from command prompt
  *
- */
+ *//*
 @Component
 public class GenericCrawlerEntry {
 
@@ -30,9 +30,9 @@ public class GenericCrawlerEntry {
 	@Qualifier("GenericMultiThreadedWebCrawlerServiceImpl")
 	CrawlerService webCrawler;
 	
-	/**
+	*//**
 	 * main method is the starting point of web URL crawling
-	 */
+	 *//*
 	public static void main(String args[]) {
 		try {
 			final ApplicationContext context = new ClassPathXmlApplicationContext(
@@ -54,19 +54,19 @@ public class GenericCrawlerEntry {
 		}
 	}
 	
-	/**
+	*//**
 	 * non-static method which calls the crawling mechanism
-	 */
+	 *//*
 	public boolean crawlWebPage() {
 		webCrawler.processRequest();
 		//webCrawler.test();
 		return true;
 	}
 	
-	/**
+	*//**
 	 * overloaded non-static method which calls the crawling mechanism
 	 * based on input arguments
-	 */
+	 *//*
 	public boolean crawlWebPage(String args[]) {
 		
 		if(args.length<3){
@@ -76,23 +76,24 @@ public class GenericCrawlerEntry {
 			for(int i=0;i<Integer.parseInt(args[1]);i++){
 				List<String> s= new ArrayList<String>();
 				s.add(args[i+2]);
-				//webCrawler.processRequest(args[0],Integer.parseInt(args[1]),s);
+				webCrawler.processRequest(args[0],Integer.parseInt(args[1]),s);
 			}
 			webCrawler.processRequest();
 		}
 		return true;
 	}
-	/**
+	*//**
 	 * @return the webCrawler
-	 */
+	 *//*
 	public CrawlerService getWebCrawler() {
 		return webCrawler;
 	}
-	/**
+	*//**
 	 * @param webCrawler the webCrawler to set
-	 */
+	 *//*
 	public void setWebCrawler(CrawlerService webCrawler) {
 		this.webCrawler = webCrawler;
 	}
 	
 }
+*/
