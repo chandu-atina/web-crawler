@@ -1,5 +1,7 @@
 package com.crawl.web.util;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 /**
@@ -44,6 +46,10 @@ public class ApplicationProperties {
 	 * the forums 
 	 */
 	private String orgFileNameExtension;
+	
+	private Integer levels;
+	
+	private List<String> keywords;
 
 	/**
 	 * @return the webURL
@@ -127,6 +133,35 @@ public class ApplicationProperties {
 	 */
 	public void setOrgFileNameExtension(String orgFileNameExtension) {
 		this.orgFileNameExtension = orgFileNameExtension;
+	}
+
+	/**
+	 * @return the no.of page levels to crawl 
+	 */
+	public Integer getLevels() {
+		return levels;
+	}
+	
+	/**
+	 * @param levels sets the no.of
+	 * page levels to crawl
+	 */
+	public void setLevels(Integer levels) {
+		this.levels = levels;
+	}
+	
+	/**
+	 * @return the keywords to crawl 
+	 */
+	public List<String> getKeywords() {
+		return keywords;
+	}
+
+	/**
+	 * @param keywords set the keywords to crawl 
+	 */
+	public void setKeywords(List<String> keywords) {
+		this.keywords = keywords;
 	}
 
 	/**

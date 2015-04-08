@@ -91,5 +91,6 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>3.0.5.RELEASE</spring.version>
+		<sonar.host.url>http://localhost:9000/</sonar.host.url>
 	</properties>
 </project>

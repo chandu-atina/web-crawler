@@ -1,6 +1,8 @@
 package com.crawl.web.service;
 
 
+import java.util.List;
+
 import com.crawl.web.util.exception.WebCrawlerServiceException;
 
 /*
@@ -19,6 +21,8 @@ public interface CrawlerService {
 	public void processRequest() throws WebCrawlerServiceException;
 	
 	public void processRequest(String year, String mailLocation) throws WebCrawlerServiceException;
+	
+	public void processRequest(String URL, Integer levels, List<String> keywords) throws WebCrawlerServiceException;
 	
 	public void test();
 

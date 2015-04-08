@@ -36,6 +36,7 @@ public class URLFormatterTest extends TestCase{
 		urlList.add("[HtmlAnchor[<a href=\"201310.mbox/browser\" title=\"Dynamic browser\">]");
 		
 		String regex="2013.*mbox/browser";
+		//List<String> actualList=urlFormat.getURLList("http://www.google.com/", urlList, regex);
 		List<String> actualList=urlFormat.getURLList("http://www.google.com/", urlList, regex);
 		
 		assertEquals("Mismatch ",expectedList, actualList);

@@ -497,4 +497,7 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public void setAppCache(GenericApplicationCache appCache) {
 		this.appCache = appCache;
 	}
+	public void processRequest(String URL, Integer levels, List<String> keywords) throws WebCrawlerServiceException{
+		return;
+	}
 }

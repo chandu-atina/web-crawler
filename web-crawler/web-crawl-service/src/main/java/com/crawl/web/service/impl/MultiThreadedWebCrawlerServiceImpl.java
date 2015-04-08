@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.xml.soap.Node;
 
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -624,5 +625,8 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 			}
 		}
 
+	}
+	public void processRequest(String URL, Integer levels, List<String> keywords) throws WebCrawlerServiceException{
+		return;
 	}
 }
