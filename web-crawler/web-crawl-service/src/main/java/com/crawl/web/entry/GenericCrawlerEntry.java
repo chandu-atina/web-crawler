@@ -76,7 +76,7 @@ public class GenericCrawlerEntry {
 			for(int i=0;i<Integer.parseInt(args[1]);i++){
 				List<String> s= new ArrayList<String>();
 				s.add(args[i+2]);
-				webCrawler.processRequest(args[0],Integer.parseInt(args[1]),s);
+				//webCrawler.processRequest(args[0],Integer.parseInt(args[1]),s);
 			}
 			webCrawler.processRequest();
 		}
