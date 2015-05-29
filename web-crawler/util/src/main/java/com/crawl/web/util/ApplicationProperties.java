@@ -50,6 +50,8 @@ public class ApplicationProperties {
 	private Integer levels;
 	
 	private List<String> keywords;
+	
+	private Boolean doTag;
 
 	/**
 	 * @return the webURL
@@ -162,6 +164,22 @@ public class ApplicationProperties {
 	 */
 	public void setKeywords(List<String> keywords) {
 		this.keywords = keywords;
+	}
+	
+	/**
+	 * @return the tagging option for
+	 * crawled documents 
+	 */
+	public Boolean getDoTag() {
+		return doTag;
+	}
+	
+	/**
+	 * @param doTag set the Tagging option for
+	 * crawled documents. 
+	 */
+	public void setDoTag(Boolean doTag) {
+		this.doTag = doTag;
 	}
 
 	/**

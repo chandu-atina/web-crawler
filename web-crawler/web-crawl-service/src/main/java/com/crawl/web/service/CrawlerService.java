@@ -24,6 +24,13 @@ public interface CrawlerService {
 	
 	public void processRequest(String URL, Integer levels, List<String> keywords) throws WebCrawlerServiceException;
 	
+	public void processRequest(Boolean doTag) throws WebCrawlerServiceException;
+	
+	public void processRequest(String year, String mailLocation,Boolean doTag) throws WebCrawlerServiceException;
+	
+	public void processRequest(String URL, Integer levels, List<String> keywords,Boolean doTag) throws WebCrawlerServiceException;
+
+	
 	public void test();
 
 }

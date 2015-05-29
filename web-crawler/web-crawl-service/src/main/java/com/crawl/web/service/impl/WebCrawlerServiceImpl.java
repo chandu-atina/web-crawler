@@ -500,4 +500,33 @@ public class WebCrawlerServiceImpl implements CrawlerService {
 	public void processRequest(String URL, Integer levels, List<String> keywords) throws WebCrawlerServiceException{
 		return;
 	}
+	
+	@Override
+	public void processRequest(Boolean doTag)
+			throws com.crawl.web.util.exception.WebCrawlerServiceException {
+		// TODO Auto-generated method stub
+		appProp.setDoTag(doTag);
+		processRequest();
+		
+	}
+
+	@Override
+	public void processRequest(String year, String mailLocation, Boolean doTag)
+			throws com.crawl.web.util.exception.WebCrawlerServiceException {
+		// TODO Auto-generated method stub
+		appProp.setYear(year);
+		appProp.setMailLocation(mailLocation);
+		appProp.setDoTag(doTag);
+		processRequest();
+		
+	}
+
+	@Override
+	public void processRequest(String URL, Integer levels,
+			List<String> keywords, Boolean doTag)
+			throws com.crawl.web.util.exception.WebCrawlerServiceException {
+		// TODO Auto-generated method stub
+		return;
+		
+	}
 }
