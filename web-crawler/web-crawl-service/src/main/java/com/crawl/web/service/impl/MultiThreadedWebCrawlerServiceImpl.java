@@ -342,7 +342,7 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 				appCache.getOrganisationList().put(organisation, topicList);
 			}
 
-			bw.write(page.asXml());
+			bw.write(StringEscapeUtils.unescapeHtml4(page.asText()));
 			bw.close();
 			log.info("Method:" + METHOD_NAME + "Thread Name :" + threadName
 					+ " Saved content from URL :" + url);
