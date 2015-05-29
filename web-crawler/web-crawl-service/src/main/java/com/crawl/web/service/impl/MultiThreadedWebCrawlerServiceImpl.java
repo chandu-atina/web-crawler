@@ -17,6 +17,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -33,6 +34,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.soap.Node;
+
+import opennlp.tools.postag.POSModel;
+import opennlp.tools.postag.POSTaggerME;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.log4j.Logger;
@@ -111,6 +115,8 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	 */
 	public void processRequest() throws WebCrawlerServiceException {
 		final String METHOD_NAME = "processRequest - ";
+		
+		
 		try {
 
 			/* comment out to turn off annoying htmlunit warnings */
@@ -291,6 +297,12 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 	 */
 	public boolean saveMails(List<String> mailURLList, String directoryName,
 			String threadName) throws IOException {
+		
+		InputStream modelIn = new FileInputStream(
+				"data/openNLPModels/en-pos-maxent.bin");
+		POSModel model = new POSModel(modelIn);
+		POSTaggerME tagger = new POSTaggerME(model);
+		
 		boolean processedFlag = false;
 		final String METHOD_NAME = "saveMails - ";
 		WebClient webClient = new WebClient(BrowserVersion.FIREFOX_24);
@@ -303,6 +315,8 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 			fileName = url.substring(url.indexOf("ajax/") + 5, url.length());
 			String path = appProp.getMailLocation() + directoryName + "/"
 					+ fileName;
+			String taggedPath=appProp.getMailLocation() + directoryName + "_tagged/"
+					+ fileName+".tagged";
 			File file = new File(path);
 			file.getParentFile().mkdirs();
 			file.createNewFile();
@@ -341,9 +355,19 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 				topicList.add(subject);
 				appCache.getOrganisationList().put(organisation, topicList);
 			}
-
-			bw.write(StringEscapeUtils.unescapeHtml4(page.asText()));
+			String unescapedCOntent=StringEscapeUtils.unescapeHtml4(page.asText());
+			bw.write(unescapedCOntent);
 			bw.close();
+			
+			if(appProp.getDoTag()){
+				tagFile(unescapedCOntent,taggedPath,tagger);
+				if (modelIn != null) {
+					try {
+						modelIn.close();
+					} catch (IOException e1) {
+					}
+				}
+			}
 			log.info("Method:" + METHOD_NAME + "Thread Name :" + threadName
 					+ " Saved content from URL :" + url);
 			appCache.setAppCacheValue(threadName
@@ -657,5 +681,31 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 		// TODO Auto-generated method stub
 		return;
 		
+	}
+	
+	public boolean tagFile(String content,String filePath,POSTaggerME tagger) throws IOException {
+
+		//InputStream modelIn = null;
+		try {
+			/*modelIn = new FileInputStream(
+					"data/openNLPModels/en-pos-maxent.bin");
+			POSModel model = new POSModel(modelIn);
+			POSTaggerME tagger = new POSTaggerME(model); */
+			String taggedContent = tagger.tag(content.toString());
+			log.info(taggedContent);
+
+			File file = new File(filePath);
+			file.getParentFile().mkdirs();
+			file.createNewFile();
+
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(taggedContent);
+			bw.close();
+		} catch (IOException e) {
+			// Model loading failed, handle the error
+			e.printStackTrace();
+		}
+		return true;
 	}
 }
