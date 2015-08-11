@@ -85,7 +85,6 @@
 			<groupId>edu.stanford.nlp</groupId>
 			<artifactId>stanford-corenlp</artifactId>
 			<version>3.5.2</version>
-			<classifier>models</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.opennlp</groupId>
