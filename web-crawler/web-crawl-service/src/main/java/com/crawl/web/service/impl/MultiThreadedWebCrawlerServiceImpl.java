@@ -19,7 +19,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -312,7 +314,7 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 			String fileName = "";
 			XmlPage page = webClient.getPage(url);
 
-			fileName = url.substring(url.indexOf("ajax/") + 5, url.length());
+			fileName = URLDecoder.decode(url.substring(url.indexOf("ajax/") + 5, url.length()),"UTF-8");
 			String path = appProp.getMailLocation() + directoryName + "/"
 					+ fileName;
 			String taggedPath=appProp.getMailLocation() + directoryName + "_tagged/"
@@ -355,12 +357,12 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 				topicList.add(subject);
 				appCache.getOrganisationList().put(organisation, topicList);
 			}
-			String unescapedCOntent=StringEscapeUtils.unescapeHtml4(page.asText());
-			bw.write(unescapedCOntent);
+			String unescapedContent=StringEscapeUtils.unescapeHtml4(page.asText()).replaceAll("[^a-zA-Z0-9%.@\\s_-]", "");
+			bw.write(unescapedContent);
 			bw.close();
 			
 			if(appProp.getDoTag()){
-				tagFile(unescapedCOntent,taggedPath,tagger);
+				tagFile(unescapedContent,taggedPath,tagger);
 				if (modelIn != null) {
 					try {
 						modelIn.close();
@@ -401,6 +403,12 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 		System.out
 				.println(StringEscapeUtils
 						.unescapeHtml4("%3c00b201cf0b07$a919a320$fb4ce960$@eclipse.co.uk%3e"));
+		try {
+			System.out.println(java.net.URLDecoder.decode("%3c00b201cf0b07$a919a320$fb4ce960$@eclipse.co.uk%3e", "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -579,7 +587,7 @@ public class MultiThreadedWebCrawlerServiceImpl implements CrawlerService {
 		NodeList nList = doc.getElementsByTagName("message");
 		for (int temp = 0; temp < nList.getLength(); temp++) {
 			org.w3c.dom.Node nNode = nList.item(temp);
-			log.info("\nCurrent Element :" + nNode.getNodeName());
+			//log.info("\nCurrent Element :" + nNode.getNodeName());
 			if (nNode.getNodeType() == Node.ELEMENT_NODE) {
 
 				Element eElement = (Element) nNode;
