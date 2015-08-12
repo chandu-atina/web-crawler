@@ -1,4 +1,4 @@
-package com.crawl.web.service.impl;
+/*package com.crawl.web.service.impl;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,12 +20,12 @@ public class WebCrawlerServiceImplTest{
 	private static final String CONFIG_PATH = "classpath:Application-config-crawler.xml";
 	
 	private static ApplicationContext context;
-	/**
+	*//**
 	 * 
 	 * @throws Exception
 	 * Check if all properties are loaded by spring IOC.
 	 * Asserts if any of the property is null
-	 */
+	 *//*
 	
 	@BeforeClass
 	public static void method(){
@@ -78,3 +78,4 @@ public class WebCrawlerServiceImplTest{
 		Assert.assertEquals("Invalid save point URL !!!", directoryName,savePoint.get("DIRECTORY"));
 	}
 }
+*/
