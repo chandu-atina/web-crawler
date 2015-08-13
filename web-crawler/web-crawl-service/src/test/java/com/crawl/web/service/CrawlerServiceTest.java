@@ -30,12 +30,12 @@ public class CrawlerServiceTest {
 		//Assert.assertFalse("Application Properties are not loaded successfully",flag);
 	} */
 	
-	@Test (expected = WebCrawlerServiceException.class)
+/*	@Test (expected = WebCrawlerServiceException.class)
 	public void testTest(){
 		final ApplicationContext context = new ClassPathXmlApplicationContext(
 				CONFIG_PATH);
 		final CrawlerService crawler = context.getBean(WebCrawlerServiceImpl.class);
 		crawler.test();
 		
-	}
+	}*/
 }
