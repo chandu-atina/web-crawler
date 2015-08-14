@@ -21,7 +21,7 @@ public class CrawlerServiceTest {
 	 * Check if all properties are loaded by spring IOC.
 	 * Asserts if any of the property is null
 	 */
-	@Test
+	/*@Test
 	public void testProcessRequest(){
 		final ApplicationContext context = new ClassPathXmlApplicationContext(
 				CONFIG_PATH);
@@ -37,5 +37,5 @@ public class CrawlerServiceTest {
 		final CrawlerService crawler = context.getBean(WebCrawlerServiceImpl.class);
 		crawler.test();
 		
-	}
+	}*/
 }
